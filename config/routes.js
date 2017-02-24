@@ -16,6 +16,6 @@ module.exports = function (app, passport, auth) {
   app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/login' }), users.authCallback);
 
   // this is home page controller
-  app.get('/', home.index);
+  app.get('/', users.index);
 }
 

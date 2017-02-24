@@ -47,9 +47,9 @@ module.exports = function(passport) {
 
   // use twitter strategy
   passport.use(new TwitterStrategy({
-        consumerKey: 'config.twitter.clientID',
-        consumerSecret: 'config.twitter.clientSecret',
-        callbackURL: 'config.twitter.callbackURL'
+        consumerKey: config.twitter.clientID,
+        consumerSecret: config.twitter.clientSecret,
+        callbackURL: config.twitter.callbackURL
     },
     function(token, tokenSecret, profile, done) {
       User.findOne({ 'twitter.id': parseInt(profile.id) }, function (err, user) {

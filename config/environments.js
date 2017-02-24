@@ -1,4 +1,6 @@
 
+var credentials = require('./credentials.js');
+
 module.exports = {
   environment : 'development',
   development: {
@@ -12,16 +14,16 @@ module.exports = {
   staging: {
     port : "80",
     twitter: {
-      clientID: "CONSUMER_KEY",
-      clientSecret: "CONSUMER_SECRET",
+      clientID: credentials["staging"]["clientID"],
+      clientSecret: credentials["staging"]["clientSecret"],
       callbackURL: "CALLBACKURL"
     }
   },
   production: {
     port : "80",
     twitter: {
-      clientID: "CONSUMER_KEY",
-      clientSecret: "CONSUMER_SECRET",
+      clientID: credentials["production"]["clientID"],
+      clientSecret: credentials["production"]["clientSecret"],
       callbackURL: "CALLBACKURL"
     }
   }

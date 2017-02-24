@@ -6,18 +6,16 @@
 var mongoose = require('mongoose')
   ,User = mongoose.model('User');
 
-exports.signin = function (req, res) {}
 
 /**
  * Auth callback
 */
-
 exports.authCallback = function (req, res, next) {
   res.redirect('/');
 }
 
 /**
- * Show login form
+* Show login form
 */
 
 exports.login = function (req, res) {
@@ -113,3 +111,10 @@ exports.user = function (req, res, next, id) {
       next()
     });
 }
+
+exports.index = function(req, res){
+  res.render('user/index', {
+    title: 'Welcome'
+  });
+}
+
