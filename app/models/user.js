@@ -1,49 +1,134 @@
 
-var mongoose = require('mongoose');
-var bcrypt   = require('bcrypt-nodejs');
+/**
+ * Module dependencies.
+ */
 
-// define the schema for our user model
-var userSchema = mongoose.Schema({
-    email: String,
-    hashed_password: String,
-    salt: String,
-    provider: String,
-    name: String,
-    avatar : String,
-    age : String,
-    gender : String,
-    facebook: {},
-    twitter: {},
-    github: {},
-    google: {}
-    /*local            : {
-        email        : String,
-        password     : String,
-    },
-    facebook         : {
-        id           : String,
-        token        : String,
-        email        : String,
-        name         : String
-    },
-    twitter          : {
-        id           : String,
-        token        : String,
-        displayName  : String,
-        username     : String
-    }*/
-});
+var mongoose = require('mongoose')
+  , Schema = mongoose.Schema
+  , crypto = require('crypto')
+  , _ = require('underscore')
+  , authTypes = ['twitter']
 
-// methods ======================
-// generating a hash
-userSchema.methods.generateHash = function(password) {
-    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-};
+/**
+ * User Schema
+ */
+var UserSchema = new Schema({
+  name: String,
+  email: String,
+  username: String,
+  provider: String,
+  avatar: String,
+  hashed_password: String,
+  salt: String,
+  facebook: {},
+  twitter: {},
+  github: {},
+  google: {}
+})
 
-// checking if password is valid
-userSchema.methods.validPassword = function(password) {
-    return bcrypt.compareSync(password, this.local.password);
-};
+/**
+ * Virtuals
+ */
 
-// create the model for users and expose it to our app
-module.exports = mongoose.model('User', userSchema);
+UserSchema
+  .virtual('password')
+  .set(function(password) {
+    this._password = password
+    this.salt = this.makeSalt()
+    this.hashed_password = this.encryptPassword(password)
+  })
+  .get(function() { return this._password })
+
+/**
+ * Validations
+ */
+
+var validatePresenceOf = function (value) {
+  return value && value.length
+}
+
+// the below 4 validations only apply if you are signing up using local strategy
+
+UserSchema.path('name').validate(function (name) {
+  // if you are authenticating by any of the oauth strategies, don't validate
+  if (authTypes.indexOf(this.provider) !== -1) return true
+  return name.length
+}, 'Name cannot be blank')
+
+UserSchema.path('email').validate(function (email) {
+  // if you are authenticating by any of the oauth strategies, don't validate
+  if (authTypes.indexOf(this.provider) !== -1) return true
+  return email.length
+}, 'Email cannot be blank')
+
+UserSchema.path('username').validate(function (username) {
+  // if you are authenticating by any of the oauth strategies, don't validate
+  if (authTypes.indexOf(this.provider) !== -1) return true
+  return username.length
+}, 'Username cannot be blank')
+
+UserSchema.path('hashed_password').validate(function (hashed_password) {
+  // if you are authenticating by any of the oauth strategies, don't validate
+  if (authTypes.indexOf(this.provider) !== -1) return true
+  return hashed_password.length
+}, 'Password cannot be blank')
+
+
+/**
+ * Pre-save hook
+ */
+
+UserSchema.pre('save', function(next) {
+  if (!this.isNew) return next()
+
+  if (!validatePresenceOf(this.password)
+    && authTypes.indexOf(this.provider) === -1)
+    next(new Error('Invalid password'))
+  else
+    next()
+})
+
+/**
+ * Methods
+ */
+
+UserSchema.methods = {
+
+  /**
+   * Authenticate - check if the passwords are the same
+   *
+   * @param {String} Password in the plaintext format
+   * @return {Boolean}
+   * @api public
+   */
+
+  authenticate: function(plainText) {
+    return this.encryptPassword(plainText) === this.hashed_password
+  },
+
+  /**
+   * Make salt
+   *
+   * @return {String}
+   * @api public
+   */
+
+  makeSalt: function() {
+    return Math.round((new Date().valueOf() * Math.random())) + ''
+  },
+
+  /**
+   * Encrypt password
+   *
+   * @param {String} password
+   * @return {String}
+   * @api public
+   */
+
+  encryptPassword: function(password) {
+    if (!password) return ''
+    return crypto.createHmac('sha1', this.salt).update(password).digest('hex')
+  }
+}
+
+mongoose.model('User', UserSchema);
