@@ -14,8 +14,8 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 
 var env = require('./config/environments.js')
-var config_db = require('./config/database.js');
-mongoose.connect(configDB.url); // connect to our database
+var config_db = require('./config/databases.js');
+mongoose.connect(config_db.url); // connect to our database
 
 // var index = require('./routes/index');
 // var users = require('./routes/users');
@@ -38,7 +38,7 @@ app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
 // routes ======================================================================
-require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
+require('./config/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
