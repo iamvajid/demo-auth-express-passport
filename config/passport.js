@@ -1,6 +1,8 @@
 
-//Load the passport-local strategy
-var LocalStrategy = require('passport-local').Strategy;
+var mongoose = require('mongoose')
+  , LocalStrategy = require('passport-local').Strategy
+  , TwitterStrategy = require('passport-twitter').Strategy
+  , User = mongoose.model('User')
 
 // load up the user model
 var User = require('../app/models/user');
@@ -47,7 +49,7 @@ module.exports = function(passport) {
   passport.use(new TwitterStrategy({
         consumerKey: 'config.twitter.clientID',
         consumerSecret: 'config.twitter.clientSecret',
-        callbackURL: conf'ig.twitter.callbackURL'
+        callbackURL: 'config.twitter.callbackURL'
     },
     function(token, tokenSecret, profile, done) {
       User.findOne({ 'twitter.id': parseInt(profile.id) }, function (err, user) {
