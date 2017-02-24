@@ -1,6 +1,7 @@
 
 var express = require('express');
 var app = express();
+var credentials = require('./config/credentials.js');
 
 var path = require('path');
 var flash  = require('connect-flash');
@@ -17,9 +18,6 @@ var env = require('./config/environments.js')
 var config_db = require('./config/databases.js');
 mongoose.connect(config_db.url); // connect to our database
 
-// var index = require('./routes/index');
-// var users = require('./routes/users');
-
 app.use(express.static(path.join(__dirname, 'public')));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -32,7 +30,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use(session({ secret: 'anysecretissecrettillexposed' })); // session secret
+app.use(session({ secret: credentials['session_secret']})); // session secret
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
