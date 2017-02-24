@@ -1,0 +1,7 @@
+logs
+node_modules
+logs/*
+node_modules/*
+/bin
+npm-debug.log
+
